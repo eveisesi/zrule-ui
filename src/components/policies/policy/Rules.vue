@@ -16,9 +16,7 @@
                     >
                         <font-awesome-icon icon="trash" />
                     </b-button>
-                    <!-- 
-                    "
-                    :disabled="selected.active" -->
+
                     <b-button
                         class="float-right mr-1"
                         variant="primary "
@@ -28,27 +26,27 @@
                     </b-button>
                 </h5>
             </template>
-
-            <b-card-body>
-                <b-container>
-                    <Condition
-                        v-for="(condition, conditionIndex) in rule"
-                        :condition="condition"
-                        :ruleIndex="index"
-                        :index="conditionIndex"
-                        :key="conditionIndex"
-                        @updateCondition="handleUpdateCondition"
-                        @removeCondition="handleRemoveCondition"
-                        :class="conditionIndex > 0 ? 'mt-2' : ''"
-                    />
-                </b-container>
-            </b-card-body>
+            <b-container>
+                <Condition
+                    v-for="(condition, conditionIndex) in rule"
+                    :condition="condition"
+                    :ruleIndex="index"
+                    :index="conditionIndex"
+                    :key="conditionIndex"
+                    @updateCondition="handleUpdateCondition"
+                    @removeCondition="handleRemoveCondition"
+                    :class="conditionIndex > 0 ? 'mt-2' : ''"
+                    :showLine="
+                        conditionIndex > 0 && conditionIndex < rule.length - 1
+                    "
+                />
+            </b-container>
         </b-card>
     </div>
 </template>
 
 <script>
-import Condition from "./policy/Condition.vue";
+import Condition from "./rule/Condition.vue";
 export default {
     components: { Condition },
     name: "Rules",
@@ -72,11 +70,6 @@ export default {
             this.$emit("addCondition", ruleIndex);
         },
         handleUpdateCondition({ ruleIndex, conditionIndex, condition }) {
-            console.log("updateCondition", {
-                ruleIndex,
-                conditionIndex,
-                condition,
-            });
             this.$emit("updateCondition", {
                 ruleIndex,
                 conditionIndex,

@@ -3,13 +3,6 @@
         <!-- PolicyName hosts is own b-row -->
         <PolicyName :name="policy.name" @updateName="handleUpdateName" />
         <hr class="solid-white-line" />
-        <b-alert
-            :variant="alert.variant"
-            :show="alert.show"
-            @dismissed="handleResetAlert"
-        >
-            {{ alert.message }}
-        </b-alert>
         <Rules
             :rules="this.policy.rules"
             @updateCondition="handleUpdateCondition"
@@ -34,7 +27,7 @@
 
 <script>
 import PolicyName from "./policy/Name";
-import Rules from "./Rules.vue";
+import Rules from "./policy/Rules.vue";
 
 export default {
     name: "Overview",
@@ -44,12 +37,8 @@ export default {
     },
     props: {
         policy: Object,
-        alert: Object,
     },
     methods: {
-        handleResetAlert() {
-            this.$emit("resetAlert");
-        },
         handleSavePolicy() {
             this.$emit("savePolicy");
         },
@@ -69,11 +58,6 @@ export default {
             this.$emit("addCondition", evt);
         },
         handleUpdateCondition({ ruleIndex, conditionIndex, condition }) {
-            console.log("updateCondition", {
-                ruleIndex,
-                conditionIndex,
-                condition,
-            });
             this.$emit("updateCondition", {
                 ruleIndex,
                 conditionIndex,

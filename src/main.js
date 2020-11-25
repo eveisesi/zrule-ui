@@ -6,9 +6,9 @@ import "bootswatch/dist/cyborg/bootstrap.min.css";
 import VueTypeaheadBootstrap from 'vue-typeahead-bootstrap'
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faTrash, faPlus, faPencilAlt, faCheck, faUndoAlt } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faPlus, faPencilAlt, faCheck, faUndoAlt, faEye, faSyncAlt } from "@fortawesome/free-solid-svg-icons";
 
-library.add(faTrash, faPlus, faPencilAlt, faCheck, faUndoAlt)
+library.add(faTrash, faPlus, faPencilAlt, faCheck, faUndoAlt, faEye, faSyncAlt)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
@@ -39,12 +39,11 @@ axios.interceptors.response.use(res => {
 	}
 	return res
 }, err => {
-
 	if (err.response.status == 401) {
 		store.dispatch('storeToken', null)
 		router.push('/login')
 	}
-	return err
+	return Promise.reject(err)
 });
 
 new Vue({

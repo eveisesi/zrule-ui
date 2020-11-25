@@ -1,16 +1,5 @@
 <template>
     <div>
-        <b-row v-if="alert.show">
-            <b-col lg="10">
-                <b-alert
-                    :show="alert.show"
-                    :variant="alert.variant"
-                    @dismissed="resetAlert"
-                    >{{ alert.message }}</b-alert
-                >
-            </b-col>
-        </b-row>
-
         <b-row>
             <b-col lg="4">
                 <div v-if="isEditing">
@@ -90,7 +79,7 @@
                 </div>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-if="showLine">
             <b-col>
                 <hr style="background-color: white" class="m-2" />
             </b-col>
@@ -118,14 +107,13 @@ export default {
             type: Number,
             required: true,
         },
+        showLine: {
+            type: Boolean,
+            required: true,
+        },
     },
     data() {
         return {
-            alert: {
-                message: "",
-                variant: "",
-                show: false,
-            },
             isEditing: this.condition.editing,
             path: "",
             comparator: "",
@@ -171,20 +159,6 @@ export default {
     },
     methods: {
         ...mapGetters(["getPaths"]),
-        showAlert(message = "", variant = "success", show = 5) {
-            this.alert = Object.assign({}, this.alert, {
-                message,
-                variant,
-                show,
-            });
-        },
-        resetAlert() {
-            this.alert = Object.assign({}, this.alert, {
-                message: "",
-                variant: "",
-                show: false,
-            });
-        },
         handleSelection(e) {
             this.$set(this.values, 0, e.id.valueOf());
             this.$set(this.entities, 0, e);
@@ -217,11 +191,6 @@ export default {
             const paths = this.getPaths();
             const pathSpec = paths.find((e) => e.path === this.path);
             if (!pathSpec) {
-                this.showAlert(
-                    "failed to validate condition. Please try again",
-                    "warning",
-                    5
-                );
                 // alert that we are unable to validate the rule
                 return;
             }
