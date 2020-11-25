@@ -3,6 +3,8 @@
         <Navbar />
         <Overview
             :policy="policy"
+            :policyActions="policyActions"
+            :actions="actions"
             v-if="!loading"
             @addRule="handleAddRule"
             @removeRule="handleRemoveRule"
@@ -11,6 +13,8 @@
             @removeCondition="handleRemoveCondition"
             @savePolicy="handleSavePolicy"
             @deletePolicy="handleDeletePolicy"
+            @assignAction="handleAssignAction"
+            @removeAction="handleRemoveAction"
         />
         <div class="mt-5 text-center" v-else>
             <b-spinner variant="dark"></b-spinner>
@@ -33,6 +37,8 @@ export default {
         return {
             loading: true,
             policy: null,
+            policyActions: [],
+            actions: [],
         };
     },
     methods: {
@@ -47,12 +53,6 @@ export default {
             });
         },
         handleUpdateCondition({ ruleIndex, conditionIndex, condition }) {
-            console.log(
-                "Policy.vue handleUpdateCondition",
-                ruleIndex,
-                conditionIndex,
-                condition
-            );
             // You pulled your fuckin hair out trying to find this line of code.
             // https://vuejs.org/v2/guide/reactivity.html#For-Arrays
             this.$set(this.policy.rules[ruleIndex], conditionIndex, condition);
@@ -79,6 +79,27 @@ export default {
                     this.$router.push("/");
                 });
         },
+        async handleAssignAction({ actionID }) {
+            console.log("handleAssignAction", actionID);
+            const action = this.actions.find((e) => e._id === actionID);
+            if (!action) {
+                console.log(action);
+                // Use alert system to notify user of invalid action
+                return;
+            }
+            this.policy.actions.push(actionID);
+            this.policyActions.push(action);
+
+            console.log(
+                "this.policy.actions",
+                this.policy.actions,
+                "this.policyActions",
+                this.policyActions
+            );
+        },
+        handleRemoveAction({ index }) {
+            this.policy.actions.splice(index, 1);
+        },
         async handleSavePolicy() {
             this.isNewPolicy
                 ? await this.$http
@@ -89,6 +110,7 @@ export default {
                       })
                       .then(async (res) => {
                           await this.fetchPolicy(res.data._id);
+                          await this.fetchPolicyActions(res.data._id);
                           this.$router.push("/policies/" + res.data._id);
                           return;
                       })
@@ -97,10 +119,11 @@ export default {
                       .patch(API_URL + "/policies/" + this.policy._id, {
                           name: this.policy.name.valueOf(),
                           rules: this.policy.rules.valueOf(),
-                          actions: [], // TODO: Replace this with actual actions
+                          actions: this.policy.actions.valueOf(),
                       })
                       .then(async (res) => {
                           await this.fetchPolicy(this.policy._id);
+                          await this.fetchPolicyActions(this.policy._id);
                       })
                       .catch((err) => {});
         },
@@ -116,15 +139,29 @@ export default {
                 })
                 .catch((err) => {});
         },
+        async fetchPolicyActions(policyID) {
+            if (policyID == "") {
+                return;
+            }
+
+            await this.$http
+                .get(API_URL + "/policies/" + policyID + "/actions")
+                .then((res) => (this.policyActions = res.data));
+        },
+        async fetchActions() {
+            await this.$http
+                .get(API_URL + "/actions")
+                .then((res) => (this.actions = res.data));
+        },
     },
 
     async created() {
-        let pathID;
+        let policyID;
         if (this.$router.history.current.params.id != undefined) {
-            pathID = this.$router.history.current.params.id;
+            policyID = this.$router.history.current.params.id;
         }
 
-        if (pathID === "new") {
+        if (policyID === "new") {
             this.isNewPolicy = true;
             this.policy = {
                 name: "My New Policy",
@@ -135,7 +172,9 @@ export default {
 
             return;
         }
-        await this.fetchPolicy(pathID);
+        await this.fetchPolicy(policyID);
+        await this.fetchPolicyActions(policyID);
+        await this.fetchActions();
         this.loading = false;
     },
 };

@@ -10,13 +10,21 @@
             @removeCondition="handleRemoveCondition"
             @removeRule="handleRemoveRule"
         />
-
+        <div class="mt-2">
+            <b-button variant="primary" @click="handleAddRule"
+                >Add Rule</b-button
+            >
+        </div>
+        <Actions
+            :policyName="policy.name"
+            :policyActions="policyActions"
+            :actions="actions"
+            @assignAction="handleAssignAction"
+            @removeAction="handleRemoveAction"
+        />
         <div class="mt-2">
             <b-button variant="secondary" @click="handleSavePolicy"
                 >Save Policy</b-button
-            >
-            <b-button class="ml-2" variant="primary" @click="handleAddRule"
-                >Add Rule</b-button
             >
             <b-button class="ml-2" variant="danger" @click="handleDeletePolicy"
                 >Delete Policy</b-button
@@ -28,15 +36,29 @@
 <script>
 import PolicyName from "./policy/Name";
 import Rules from "./policy/Rules.vue";
+import Actions from "./policy/Actions.vue";
 
 export default {
     name: "Overview",
     components: {
         PolicyName,
         Rules,
+        Actions,
     },
+
     props: {
-        policy: Object,
+        policy: {
+            type: Object,
+            required: true,
+        },
+        policyActions: {
+            type: Array,
+            required: true,
+        },
+        actions: {
+            type: Array,
+            required: true,
+        },
     },
     methods: {
         handleSavePolicy() {
@@ -70,8 +92,15 @@ export default {
                 conditionIndex,
             });
         },
+        handleAssignAction({ actionID }) {
+            this.$emit("assignAction", {
+                actionID,
+            });
+        },
+        handleRemoveAction({ index }) {
+            this.$emit("removeAction", { index });
+        },
     },
-    created() {},
 };
 </script>
 
