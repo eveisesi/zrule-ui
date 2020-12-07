@@ -3,6 +3,7 @@
         <!-- PolicyName hosts is own b-row -->
         <PolicyName :name="policy.name" @updateName="handleUpdateName" />
         <hr class="solid-white-line" />
+        <Alert />
         <Rules
             :rules="this.policy.rules"
             @updateCondition="handleUpdateCondition"
@@ -37,6 +38,7 @@
 import PolicyName from "./policy/Name";
 import Rules from "./policy/Rules.vue";
 import Actions from "./policy/Actions.vue";
+import Alert from "../Alert";
 
 export default {
     name: "Overview",
@@ -44,6 +46,7 @@ export default {
         PolicyName,
         Rules,
         Actions,
+        Alert,
     },
 
     props: {
