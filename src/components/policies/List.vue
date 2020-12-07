@@ -43,7 +43,7 @@
                     <b-col lg="2" class="text-center">
                         <b-button
                             variant="success"
-                            :href="'policies/' + policy._id"
+                            :to="'policies/' + policy._id"
                         >
                             <font-awesome-icon icon="eye" />
                         </b-button>

@@ -1,7 +1,7 @@
 <template>
     <b-navbar toggleable="lg" type="dark" variant="dark">
         <b-container>
-            <b-navbar-brand href="/">ZRule</b-navbar-brand>
+            <b-navbar-brand to="/">ZRule</b-navbar-brand>
             <b-navbar-nav class="ml-auto">
                 <template v-slot:button-content>
                     <img src="https://images.evetech.net/Character/1_32.jpg" />
