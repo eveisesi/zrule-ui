@@ -38,7 +38,6 @@
                 </b-row>
             </b-card>
         </b-collapse>
-        <!-- <div v-if="actions.length > 0"> -->
         <div v-if="policyActions.length > 0">
             <b-row>
                 <b-col lg="5" class="text-center"> Label </b-col>
@@ -85,7 +84,6 @@ export default {
                     value: action._id,
                 };
             });
-            console.log("availableActions", s);
             return s;
         },
     },
@@ -111,9 +109,6 @@ export default {
         handleRemoveAction({ index }) {
             this.$emit("removeAction", { index });
         },
-    },
-    created() {
-        console.log(this.actions, this.policyActions);
     },
 };
 </script>
