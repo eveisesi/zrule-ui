@@ -3,7 +3,7 @@
         <b-card
             v-for="(rule, index) in rules"
             :key="index"
-            class="index > 0 ? 'mt-2' : ''"
+            :class="index > 0 ? 'mt-3' : ''"
         >
             <template #header>
                 <h5>
