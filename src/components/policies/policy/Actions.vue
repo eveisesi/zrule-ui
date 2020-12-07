@@ -106,6 +106,7 @@ export default {
     methods: {
         handleAssignAction() {
             this.$emit("assignAction", { actionID: this.selectedAction });
+            this.visible = false;
         },
         handleRemoveAction({ index }) {
             this.$emit("removeAction", { index });
