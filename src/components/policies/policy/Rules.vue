@@ -36,9 +36,7 @@
                     @updateCondition="handleUpdateCondition"
                     @removeCondition="handleRemoveCondition"
                     :class="conditionIndex > 0 ? 'mt-2' : ''"
-                    :showLine="
-                        conditionIndex > 0 && conditionIndex < rule.length - 1
-                    "
+                    :showLine="conditionIndex < rule.length - 1"
                 />
             </b-container>
         </b-card>
