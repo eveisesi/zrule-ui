@@ -56,9 +56,18 @@ export default {
                 .delete(API_URL + "/policies/" + policy._id)
                 .then((res) => {
                     this.policies.splice(index, 1);
+                    this.storeAlertProps({
+                        message: "Policy has been deleted successfully",
+                        show: 5,
+                        variant: "danger",
+                    });
                 })
                 .catch((err) => {
-                    console.error("Failed to delete policy");
+                    this.storeAlertProps({
+                        message: err.response.data.message,
+                        show: 5,
+                        variant: "danger",
+                    });
                 });
         },
         async handleCreateAction({ label, tested, endpoint }) {
@@ -70,8 +79,9 @@ export default {
                 .then(async (res) => {
                     await this.handleFetchActions();
                     this.storeAlertProps({
-                        message: "action created successfully",
+                        message: "Action created successfully",
                         show: 5,
+                        variant: "success",
                     });
                 });
         },
@@ -87,6 +97,7 @@ export default {
                     this.storeAlertProps({
                         show: 10,
                         message: "Action Verified Successfully",
+                        variant: "success",
                     });
                     if (!action.tested) {
                         await this.handleFetchActions();
@@ -114,14 +125,24 @@ export default {
                         message: "Action has been deleted successfully",
                     });
                 })
-                .catch((err) => {});
+                .catch((err) => {
+                    this.storeAlertProps({
+                        message: err.response.data.message,
+                        show: 5,
+                        variant: "danger",
+                    });
+                });
         },
         async handleFetchActions() {
             await this.$http
                 .get(API_URL + "/actions")
                 .then((res) => (this.actions = res.data))
                 .catch((err) => {
-                    console.error(err);
+                    this.storeAlertProps({
+                        message: err.response.data.message,
+                        show: 5,
+                        variant: "danger",
+                    });
                 });
         },
         async handleFetchPolicies() {
@@ -131,7 +152,11 @@ export default {
                     this.policies = response.data;
                 })
                 .catch((err) => {
-                    console.error(err);
+                    this.storeAlertProps({
+                        message: err.response.data.message,
+                        show: 5,
+                        variant: "danger",
+                    });
                 });
         },
     },

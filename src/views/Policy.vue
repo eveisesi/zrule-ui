@@ -122,7 +122,13 @@ export default {
                           });
                           return;
                       })
-                      .catch((err) => {})
+                      .catch((err) => {
+                          this.storeAlertProps({
+                              show: 10,
+                              message: err.response.data.message,
+                              variant: "danger",
+                          });
+                      })
                 : await this.$http
                       .patch(API_URL + "/policies/" + this.policy._id, {
                           name: this.policy.name.valueOf(),
@@ -137,7 +143,13 @@ export default {
                               message: "Policy Updated Successfully",
                           });
                       })
-                      .catch((err) => {});
+                      .catch((err) => {
+                          this.storeAlertProps({
+                              show: 10,
+                              message: err.response.data.message,
+                              variant: "danger",
+                          });
+                      });
         },
         async fetchPolicy(policyID) {
             if (policyID == "") {
