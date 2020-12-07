@@ -26,6 +26,16 @@
 import Navbar from "../components/Navbar.vue";
 import { API_URL } from "@/const";
 import Overview from "../components/policies/Overview.vue";
+import { mapActions } from "vuex";
+
+const blankCondition = {
+    path: "",
+    comparator: "",
+    values: [],
+    entities: [],
+    editing: true,
+    isNew: true,
+};
 
 export default {
     name: "Policy",
@@ -42,15 +52,9 @@ export default {
         };
     },
     methods: {
+        ...mapActions(["storeAlertProps"]),
         handleAddCondition(e) {
-            this.policy.rules[e].push({
-                path: "",
-                comparator: "",
-                values: [],
-                entities: [],
-                editing: true,
-                isNew: true,
-            });
+            this.policy.rules[e].push(blankCondition);
         },
         handleUpdateCondition({ ruleIndex, conditionIndex, condition }) {
             // You pulled your fuckin hair out trying to find this line of code.
@@ -61,7 +65,6 @@ export default {
             this.policy.rules.push([]);
         },
         handleRemoveRule({ ruleIndex }) {
-            console.log("Policy.vue handleRemoveRule", ruleIndex);
             this.policy.rules.splice(ruleIndex, 1);
         },
         handleRemoveCondition({ ruleIndex, conditionIndex }) {
@@ -70,17 +73,21 @@ export default {
         async handleDeletePolicy() {
             if (this.isNewPolicy) {
                 this.$router.push("/");
+                return;
             }
 
-            this.$http
+            await this.$http
                 .delete(API_URL + "/policies/" + this.policy._id)
                 .then((res) => {
-                    setTimeout(function () {}, 2000);
+                    // setTimeout(function () {}, 2000);
+                    this.storeAlertProps({
+                        message: "Policy deleted successfully",
+                        show: 10,
+                    });
                     this.$router.push("/");
                 });
         },
         async handleAssignAction({ actionID }) {
-            console.log("handleAssignAction", actionID);
             const action = this.actions.find((e) => e._id === actionID);
             if (!action) {
                 console.log(action);
@@ -89,15 +96,12 @@ export default {
             }
             this.policy.actions.push(actionID);
             this.policyActions.push(action);
-
-            console.log(
-                "this.policy.actions",
-                this.policy.actions,
-                "this.policyActions",
-                this.policyActions
-            );
         },
         handleRemoveAction({ index }) {
+            const action = this.policy.actions[index];
+            this.policyActions = this.policyActions.filter(
+                (e) => e._id != action
+            );
             this.policy.actions.splice(index, 1);
         },
         async handleSavePolicy() {
@@ -106,12 +110,16 @@ export default {
                       .post(API_URL + "/policies", {
                           name: this.policy.name.valueOf(),
                           rules: this.policy.rules.valueOf(),
-                          actions: [], // TODO: Replace this with actual actions
+                          actions: this.policy.actions.valueOf(),
                       })
                       .then(async (res) => {
                           await this.fetchPolicy(res.data._id);
                           await this.fetchPolicyActions(res.data._id);
                           this.$router.push("/policies/" + res.data._id);
+                          this.storeAlertProps({
+                              show: 10,
+                              message: "Policy Created Successfully",
+                          });
                           return;
                       })
                       .catch((err) => {})
@@ -124,6 +132,10 @@ export default {
                       .then(async (res) => {
                           await this.fetchPolicy(this.policy._id);
                           await this.fetchPolicyActions(this.policy._id);
+                          this.storeAlertProps({
+                              show: 10,
+                              message: "Policy Updated Successfully",
+                          });
                       })
                       .catch((err) => {});
         },
@@ -160,12 +172,12 @@ export default {
         if (this.$router.history.current.params.id != undefined) {
             policyID = this.$router.history.current.params.id;
         }
-
+        await this.fetchActions();
         if (policyID === "new") {
             this.isNewPolicy = true;
             this.policy = {
                 name: "My New Policy",
-                rules: [],
+                rules: [[blankCondition]],
                 actions: [],
             };
             this.loading = false;
@@ -174,7 +186,7 @@ export default {
         }
         await this.fetchPolicy(policyID);
         await this.fetchPolicyActions(policyID);
-        await this.fetchActions();
+
         this.loading = false;
     },
 };
