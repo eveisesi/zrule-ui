@@ -83,14 +83,22 @@ export default {
 
             await this.$http
                 .post(API_URL + "/actions/" + action._id + "/test")
-                .then((res) => {
+                .then(async (res) => {
                     this.storeAlertProps({
                         show: 10,
-                        message: "Ok, we've sent that test message",
+                        message: "Action Verified Successfully",
                     });
+                    if (!action.tested) {
+                        await this.handleFetchActions();
+                    }
                 })
                 .catch((err) => {
-                    console.error(err);
+                    this.storeAlertProps({
+                        message:
+                            "Verification Failed: " + err.response.data.message,
+                        show: 10,
+                        variant: "danger",
+                    });
                 });
         },
         async handleDeleteAction({ indexID }) {
