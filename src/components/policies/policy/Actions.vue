@@ -14,7 +14,7 @@
         </template>
         <b-collapse id="collapse-4" v-model="visible" class="mt-0 mx-2 mb-4">
             <b-card bg-variant="light" header="Light">
-                <template #header> <h5>Create A New Action</h5> </template>
+                <template #header> <h5>Attach an Action</h5> </template>
                 <b-row>
                     <b-col lg="11">
                         <label for="DrpdwnAvailableActions"
