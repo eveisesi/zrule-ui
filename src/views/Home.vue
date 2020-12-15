@@ -2,7 +2,7 @@
     <div>
         <Navbar />
         <b-container>
-            <b-col>
+            <b-col v-if="!loading">
                 <h3>Welcome {{ user.name }}</h3>
                 <hr style="background-color: white" />
                 <Alert />
@@ -18,6 +18,11 @@
                     @createAction="handleCreateAction"
                 />
             </b-col>
+            <b-col v-else>
+                <div class="mt-5 text-center">
+                    <b-spinner variant="dark"></b-spinner>
+                </div>
+            </b-col>
         </b-container>
     </div>
 </template>
@@ -28,7 +33,7 @@ import { API_URL } from "@/const";
 import Policies from "@/components/policies/List.vue";
 import Actions from "@/components/actions/List.vue";
 import Navbar from "@/components/Navbar";
-import Alert from "../components/Alert.vue";
+import Alert from "@/components/Alert.vue";
 
 export default {
     name: "Home",
@@ -43,6 +48,7 @@ export default {
             policies: [],
             actions: [],
             user: null,
+            loading: true,
         };
     },
     methods: {
@@ -165,8 +171,7 @@ export default {
         this.user = this.$store.getters.getUser;
         await this.handleFetchActions();
         await this.handleFetchPolicies();
+        this.loading = false;
     },
 };
 </script>
-
-src\components\Policies\Summay.vue

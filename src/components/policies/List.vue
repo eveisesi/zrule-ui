@@ -33,7 +33,6 @@
                 >
                     <b-col lg="4" class="text-center">
                         {{ policy.name }}
-                        <!-- <router-link :to="'policies/' + policy._id"></router-link> -->
                     </b-col>
                     <b-col lg="3" class="text-center">{{
                         policy.rules.length
