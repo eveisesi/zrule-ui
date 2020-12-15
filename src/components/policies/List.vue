@@ -8,6 +8,7 @@
                         class="float-right"
                         variant="primary "
                         href="/policies/new"
+                        :disabled="preventNewPolicies"
                     >
                         <font-awesome-icon icon="plus" />
                     </b-button>
@@ -70,6 +71,7 @@ export default {
     name: "List",
     props: {
         policies: Array,
+        preventNewPolicies: Boolean,
     },
     data() {
         return {

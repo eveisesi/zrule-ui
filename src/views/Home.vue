@@ -8,6 +8,7 @@
                 <Alert />
                 <Policies
                     :policies="policies"
+                    :preventNewPolicies="actions.length == 0"
                     @removePolicy="handleRemovePolicy"
                 />
                 <Actions
