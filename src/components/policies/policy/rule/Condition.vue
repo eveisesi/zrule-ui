@@ -35,9 +35,6 @@
                         placeholder="Start typing to search for an entity"
                         @hit="handleSearchSelection"
                     />
-                    <b-form-checkbox v-model="searchStrict" class="mt-2"
-                        >Use Strict Mode For Search</b-form-checkbox
-                    >
                 </div>
                 <div v-else-if="pathFormat === 'boolean'">
                     <b-form-select
@@ -111,9 +108,11 @@
 
 <script>
 import { mapGetters } from "vuex";
-import { API_URL } from "@/const";
+import { API_URL, ESI_URL } from "@/const";
+import { CancelToken, isCancel } from "axios";
 import numeral from "numeral";
 import _ from "underscore";
+import { mapActions } from "vuex";
 
 export default {
     name: "Condition",
@@ -149,8 +148,8 @@ export default {
                     : false,
             searchResults: [],
             searchQuery: "",
-            searchStrict: false,
             selectedBool: null,
+            searchCancelToken: null,
             inputtedNumber: null,
         };
     },
@@ -215,28 +214,24 @@ export default {
             return numeral(total).format("0,0");
         },
         ...mapGetters(["getPaths"]),
+        ...mapActions(["storeAlertProps"]),
         handleSearchSelection(e) {
             this.$set(this.values, 0, e.id.valueOf());
             this.$set(this.entities, 0, e);
-            console.log("handleSearchSelection", this.values, this.entities);
         },
         handleBooleanSelection(e) {
             this.$set(this.values, 0, e);
             this.$set(this.entities, 0, {});
-            console.log("handleBooleanSelection", this.values, this.entities);
         },
         handleNumberSelection(e) {
             this.$set(this.values, 0, parseInt(e));
             this.$set(this.entities, 0, {});
-            console.log("handleNumberSelection", this.values, this.entities);
         },
         editCondition() {
-            console.log("Condition editCondition", this.condition);
             this.path = this.condition.path.valueOf();
             const path = this.getPaths().find((e) => e.path === this.path);
             this.comparator = this.condition.comparator.valueOf();
             this.values = this.condition.values.valueOf();
-            console.log(path);
             switch (path.format) {
                 case "string":
                     this.entities = this.condition.entities.valueOf();
@@ -266,13 +261,42 @@ export default {
             return path.category;
         },
 
-        validateCondition() {
+        async validateCondition() {
+            if (this.searchCancelToken) {
+                this.searchCancelToken.cancel();
+            }
             const paths = this.getPaths();
             const pathSpec = paths.find((e) => e.path === this.path);
             if (!pathSpec) {
                 // alert that we are unable to validate the rule
                 return;
             }
+
+            if (this.values.length < 1) {
+                return;
+            }
+
+            const value = this.values[0];
+
+            await this.$http
+                .post(API_URL + "/search/" + pathSpec.category + "/" + value)
+                .then((res) => {
+                    console.log(res);
+                })
+                .catch((e) => {
+                    if (e.response.code > 500) {
+                        this.storeAlertProps({
+                            message:
+                                "Issue talking to backend API. please try again",
+                            show: 5,
+                        });
+                    } else {
+                        this.storeAlertProps({
+                            message: e.response.data.message,
+                            show: 5,
+                        });
+                    }
+                });
 
             const condition = {
                 ruleIndex: this.ruleIndex,
@@ -288,26 +312,122 @@ export default {
             this.$emit("updateCondition", condition);
             this.isEditing = false;
             this.searchQuery = "";
-            this.searchStrict = false;
         },
-        async searchEntity(query) {
-            if (query.length == 0) {
-                return;
+        async searchESI(category, query) {
+            if (this.searchCancelToken) {
+                this.searchCancelToken.cancel(
+                    "canceling request since a new request needs to be executed"
+                );
+                this.cancelToken = null;
             }
+
+            const source = CancelToken.source();
+            this.searchCancelToken = source;
+
+            let ids = [];
+
             await this.$http
+                .get(ESI_URL + "/v2/search", {
+                    params: {
+                        categories: category,
+                        search: query,
+                    },
+                })
+                .then((res) => {
+                    ids = res.data[category];
+                });
+
+            await this.$http
+                .post(ESI_URL + "/v3/universe/names", ids)
+                .then((res) => {
+                    this.searchResults = res.data;
+                })
+                .catch((e) => {
+                    if (isCancel(e)) {
+                        console.log("Request Cancalled", e.message);
+                    } else {
+                        console.error(e);
+                    }
+                });
+        },
+        async searchAPI(key, query) {
+            if (this.searchCancelToken) {
+                this.searchCancelToken.cancel(
+                    "canceling request since a new request needs to be executed"
+                );
+                this.cancelToken = null;
+            }
+
+            const source = CancelToken.source();
+            this.searchCancelToken = source;
+
+            this.$http
                 .get(API_URL + "/search", {
                     params: {
-                        category: this.pathCategory(),
+                        key,
                         term: query,
-                        strict: this.searchStrict,
                     },
+                    cancelToken: source.Token,
                 })
                 .then((res) => {
                     this.searchResults = res.data;
                 })
-                .catch((err) => {
-                    console.error(err);
+                .catch((e) => {
+                    if (isCancel(e)) {
+                        console.log("Request Cancalled", e.message);
+                    } else {
+                        console.error(e);
+                    }
                 });
+        },
+        async searchEntity(query) {
+            console.log("Query", query, query.length);
+            if (query.length == 0) {
+                return;
+            }
+
+            const selectedPath = this.getPaths().find(
+                (e) => e.path === this.path
+            );
+            switch (selectedPath.searchEndpoint) {
+                case "api":
+                    await this.searchAPI(selectedPath.category, query);
+                    break;
+                case "esi":
+                    await this.searchESI(selectedPath.category, query);
+                    // console.log(selectedPath.searchEndpoint, selectedPath);
+
+                    break;
+                default:
+                    console.log("unknown", selectedPath);
+            }
+            return;
+            // await this.$http
+            //     .get(ESI_URL + "/v2/search/", {
+            //         params: {
+            //             categories:
+            //                 "alliance,character,constellation,corporation,faction,inventory_type,region,solar_system",
+            //             search: query.valueOf(),
+            //         },
+            //     })
+            //     .then((res) => {
+            //         console.log(res);
+            //     });
+
+            // await this.$http
+            //     .get(API_URL + "/search", {
+            //         params: {
+            //             category: this.pathCategory(),
+            //             term: query,
+            //             strict: this.searchStrict,
+            //         },
+            //     })
+            //     .then((res) => {
+            //         this.searchResults = res.data;
+            //     })
+            //     .catch((err) => {
+            //         console.error(err);
+            //     });
         },
     },
     watch: {
