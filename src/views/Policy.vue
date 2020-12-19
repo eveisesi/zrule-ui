@@ -49,6 +49,7 @@ export default {
             policy: null,
             policyActions: [],
             actions: [],
+            isNewPolicy: false,
         };
     },
     methods: {
@@ -79,7 +80,6 @@ export default {
             await this.$http
                 .delete(API_URL + "/policies/" + this.policy._id)
                 .then((res) => {
-                    // setTimeout(function () {}, 2000);
                     this.storeAlertProps({
                         message: "Policy deleted successfully",
                         show: 10,
@@ -115,6 +115,7 @@ export default {
                       .then(async (res) => {
                           await this.fetchPolicy(res.data._id);
                           await this.fetchPolicyActions(res.data._id);
+                          this.isNewPolicy = false;
                           this.$router.push("/policies/" + res.data._id);
                           this.storeAlertProps({
                               show: 10,

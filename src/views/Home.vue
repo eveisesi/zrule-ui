@@ -66,7 +66,6 @@ export default {
                     this.storeAlertProps({
                         message: "Policy has been deleted successfully",
                         show: 5,
-                        variant: "danger",
                     });
                 })
                 .catch((err) => {

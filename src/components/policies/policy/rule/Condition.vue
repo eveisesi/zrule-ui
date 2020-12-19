@@ -272,31 +272,39 @@ export default {
                 return;
             }
 
-            if (this.values.length < 1) {
-                return;
+            if (
+                ["alliance", "corporation", "character"].includes(
+                    pathSpec.category
+                )
+            ) {
+                if (this.values.length < 1) {
+                    return;
+                }
+
+                const value = this.values[0];
+
+                await this.$http
+                    .post(
+                        API_URL + "/search/" + pathSpec.category + "/" + value
+                    )
+                    .then((res) => {
+                        console.log(res);
+                    })
+                    .catch((e) => {
+                        if (e.response.code > 500) {
+                            this.storeAlertProps({
+                                message:
+                                    "Issue talking to backend API. please try again",
+                                show: 5,
+                            });
+                        } else {
+                            this.storeAlertProps({
+                                message: e.response.data.message,
+                                show: 5,
+                            });
+                        }
+                    });
             }
-
-            const value = this.values[0];
-
-            await this.$http
-                .post(API_URL + "/search/" + pathSpec.category + "/" + value)
-                .then((res) => {
-                    console.log(res);
-                })
-                .catch((e) => {
-                    if (e.response.code > 500) {
-                        this.storeAlertProps({
-                            message:
-                                "Issue talking to backend API. please try again",
-                            show: 5,
-                        });
-                    } else {
-                        this.storeAlertProps({
-                            message: e.response.data.message,
-                            show: 5,
-                        });
-                    }
-                });
 
             const condition = {
                 ruleIndex: this.ruleIndex,
