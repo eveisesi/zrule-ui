@@ -31,7 +31,8 @@
                     :key="policy._id"
                     :class="index > 0 ? 'mt-2' : ''"
                 >
-                    <b-col lg="4" class="text-center">
+                    <b-col lg="3" class="text-center">
+                        <span v-if="policy.paused">[PAUSED]</span>
                         {{ policy.name }}
                     </b-col>
                     <b-col lg="3" class="text-center">{{
@@ -40,7 +41,7 @@
                     <b-col lg="3" class="text-center">{{
                         policy.actions.length
                     }}</b-col>
-                    <b-col lg="2" class="text-center">
+                    <b-col lg="3" class="text-center">
                         <b-button
                             variant="success"
                             :to="'policies/' + policy._id"
@@ -48,7 +49,18 @@
                             <font-awesome-icon icon="eye" />
                         </b-button>
                         <b-button
-                            class="ml-2"
+                            class="ml-1"
+                            variant="primary"
+                            @click="handlePauseAction(index)"
+                        >
+                            <font-awesome-icon
+                                icon="pause"
+                                v-if="!policy.paused"
+                            />
+                            <font-awesome-icon icon="play" v-else />
+                        </b-button>
+                        <b-button
+                            class="ml-1"
                             variant="danger"
                             @click="handleRemovePolicy(index)"
                         >
@@ -78,6 +90,9 @@ export default {
         };
     },
     methods: {
+        handlePauseAction(index) {
+            this.$emit("pausePolicy", { index });
+        },
         handleRemovePolicy(index) {
             this.$emit("removePolicy", { index });
         },
