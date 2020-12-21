@@ -6,10 +6,13 @@ import "bootswatch/dist/cyborg/bootstrap.min.css";
 import VueTypeaheadBootstrap from 'vue-typeahead-bootstrap'
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faTrash, faPlus, faPencilAlt, faCheck, faUndoAlt, faEye, faSyncAlt } from "@fortawesome/free-solid-svg-icons";
-import { API_URL, ESI_URL } from "@/const.js";
+import { faTrash, faPlus, faPencilAlt, faCheck, faUndoAlt, faEye, faSyncAlt, faPause, faPlay } from "@fortawesome/free-solid-svg-icons";
+import { API_URL } from "@/const.js";
 
-library.add(faTrash, faPlus, faPencilAlt, faCheck, faUndoAlt, faEye, faSyncAlt)
+library.add(
+	faTrash, faPlus, faPencilAlt, faCheck,
+	faUndoAlt, faEye, faSyncAlt, faPause, faPlay
+)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 

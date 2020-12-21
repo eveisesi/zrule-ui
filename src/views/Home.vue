@@ -10,6 +10,7 @@
                     :policies="policies"
                     :preventNewPolicies="actions.length == 0"
                     @removePolicy="handleRemovePolicy"
+                    @pausePolicy="handlePausePolicy"
                 />
                 <Actions
                     :actions="actions"
@@ -67,6 +68,36 @@ export default {
                         message: "Policy has been deleted successfully",
                         show: 5,
                     });
+                })
+                .catch((err) => {
+                    this.storeAlertProps({
+                        message: err.response.data.message,
+                        show: 5,
+                        variant: "danger",
+                    });
+                });
+        },
+        async handlePausePolicy({ index }) {
+            const policy = this.policies[index];
+            if (policy == undefined) {
+                return;
+            }
+
+            const paused = !policy.paused;
+
+            await this.$http
+                .patch(API_URL + "/policies/" + policy._id, {
+                    paused: paused,
+                })
+                .then(async (res) => {
+                    this.policies.splice(index, 1);
+                    this.storeAlertProps({
+                        message:
+                            "Policy has been successfully " +
+                            (paused ? "paused" : "unpaused"),
+                        show: 5,
+                    });
+                    await this.handleFetchPolicies();
                 })
                 .catch((err) => {
                     this.storeAlertProps({
