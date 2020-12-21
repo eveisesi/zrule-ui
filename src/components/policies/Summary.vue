@@ -40,7 +40,7 @@ export default {
     computed: {
         renderRules() {
             return this.rules.map((e, index) => {
-                const and = e
+                return e
                     .map((j, index2) => {
                         const path = this.getPaths().find(
                             (k) => k.path === j.path
@@ -76,8 +76,6 @@ export default {
                         }
                     })
                     .join(" AND ");
-
-                return "(" + and + ")";
             });
         },
     },
