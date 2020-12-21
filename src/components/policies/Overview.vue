@@ -4,6 +4,7 @@
         <PolicyName :name="policy.name" @updateName="handleUpdateName" />
         <hr class="solid-white-line" />
         <Alert />
+        <Summary :rules="this.policy.rules" />
         <Rules
             :rules="this.policy.rules"
             @updateCondition="handleUpdateCondition"
@@ -39,6 +40,7 @@ import PolicyName from "./policy/Name";
 import Rules from "./policy/Rules.vue";
 import Actions from "./policy/Actions.vue";
 import Alert from "../Alert";
+import Summary from "./Summary";
 
 export default {
     name: "Overview",
@@ -47,6 +49,7 @@ export default {
         Rules,
         Actions,
         Alert,
+        Summary,
     },
 
     props: {
