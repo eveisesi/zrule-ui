@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="mt-2">
         <b-card
             v-for="(rule, index) in rules"
             :key="index"
