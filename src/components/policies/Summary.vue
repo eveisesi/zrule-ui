@@ -3,7 +3,7 @@
         <b-col>
             <b-card bg-variant="light" header="Light">
                 <template #header> <h5>Summary</h5> </template>
-                <b-row v-if="summary.length == 0">
+                <b-row v-if="renderRules.length == 0">
                     This policy has no conditions, once a condition has been
                     created, this section will convert you policy into plain
                     english
@@ -11,7 +11,10 @@
                 <b-row v-else>
                     <b-col>
                         <ul>
-                            <li v-for="(line, index) in summary" :key="index">
+                            <li
+                                v-for="(line, index) in renderRules"
+                                :key="index"
+                            >
                                 {{ line }}
                             </li>
                         </ul>
@@ -28,70 +31,61 @@ import numeral from "numeral";
 
 export default {
     name: "Summary",
-    data() {
-        return {
-            summary: [],
-        };
-    },
     props: {
         rules: {
             type: Array,
             required: true,
         },
     },
+    computed: {
+        renderRules() {
+            return this.rules.map((e, index) => {
+                const and = e
+                    .map((j, index2) => {
+                        const path = this.getPaths().find(
+                            (k) => k.path === j.path
+                        );
+                        if (!path) {
+                            return "unable to summarize condition";
+                        }
 
+                        if (path.format === "string") {
+                            return (
+                                path.display +
+                                " " +
+                                j.comparator.toUpperCase() +
+                                " " +
+                                j.entities.map((a) => a.name).join(", ")
+                            );
+                        } else if (path.format === "number") {
+                            return (
+                                path.display +
+                                " " +
+                                j.comparator.toUpperCase() +
+                                " " +
+                                j.values.map((e) => this.humanize(e)).join(", ")
+                            );
+                        } else {
+                            return (
+                                path.display +
+                                " " +
+                                j.comparator.toUpperCase() +
+                                " " +
+                                j.values.map((e) => e).join(", ")
+                            );
+                        }
+                    })
+                    .join(" AND ");
+
+                return "(" + and + ")";
+            });
+        },
+    },
     methods: {
         ...mapGetters(["getPaths"]),
         humanize(total) {
             return numeral(total).format("0,0.00");
         },
-    },
-    created() {
-        const rules = this.rules.map((e, index) => {
-            const and = e
-                .map((j, index2) => {
-                    const path = this.getPaths().find((k) => k.path === j.path);
-                    console.log(index2, j, path);
-
-                    // const path = paths.find((k) => k.path === j.path);
-                    //     if (!path) {
-                    //         return "unable to summarize condition";
-                    //     }
-
-                    if (path.format === "string") {
-                        return (
-                            path.display +
-                            " " +
-                            j.comparator.toUpperCase() +
-                            " " +
-                            j.entities
-                                .map((a) => a.name + " (" + a.id + ")")
-                                .join(", ")
-                        );
-                    } else if (path.format === "number") {
-                        return (
-                            path.display +
-                            " " +
-                            j.comparator.toUpperCase() +
-                            " " +
-                            j.values.map((e) => this.humanize(e)).join(", ")
-                        );
-                    } else {
-                        return (
-                            path.display +
-                            " " +
-                            j.comparator.toUpperCase() +
-                            " " +
-                            j.values.map((e) => e).join(", ")
-                        );
-                    }
-                })
-                .join(" AND ");
-
-            return "(" + and + ")";
-        });
-
-        this.summary = rules;
     },
 };
 </script>
