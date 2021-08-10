@@ -1,4 +1,4 @@
-# zrule-ui
+# zrule-ui is dead
 
 ## Project setup
 ```
